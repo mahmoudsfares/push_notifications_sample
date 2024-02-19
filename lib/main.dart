@@ -27,7 +27,7 @@ class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
 
   void _triggerNotification() {
-    _service.showAndroidNotification('hey', 'this is a notification');
+    _service.showIOSNotification('hey', 'this is a notification');
   }
 
   @override
