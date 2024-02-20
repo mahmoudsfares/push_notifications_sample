@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  // TODO 13
+  // TODO 13: create an instance of the notification service class
   final LocalNotificationService _service = LocalNotificationService();
 
   MyHomePage({super.key});
@@ -38,7 +38,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO 14
+    // TODO 14: initialize notifications service
     _service.init();
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +47,7 @@ class MyHomePage extends StatelessWidget {
       ),
       body: const Center(child: Text('Click the button below to get a notification')),
       floatingActionButton: FloatingActionButton(
-        // TODO 15
+        // TODO 15: call the method that shows the notification
         onPressed: _triggerNotification,
         child: const Icon(Icons.notifications),
       ),

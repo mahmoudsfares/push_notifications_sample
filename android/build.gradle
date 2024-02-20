@@ -7,7 +7,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        // TODO 4
+        // TODO 4: add the following dependency
         classpath "com.android.tools.build:gradle:8.2.2"
     }
 }

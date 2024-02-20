@@ -29,7 +29,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        // TODO 1
+        // TODO 1: add this line
         coreLibraryDesugaringEnabled true
     }
 
@@ -43,7 +43,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.push_notifications_sample"
-        // TODO 2
+        // TODO 2: add this line
         multiDexEnabled true
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
@@ -53,8 +53,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
         }
     }
@@ -65,7 +63,7 @@ flutter {
 }
 
 dependencies {
-    // TODO 3
+    // TODO 3: add the following dependencies
     // the desugaring library's last version has an issue, work with this one instead
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation 'androidx.window:window:1.2.0'

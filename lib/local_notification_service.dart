@@ -4,26 +4,26 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationService {
-  // TODO 5
+  // TODO 5: instantiate FlutterLocalNotificationsPlugin
   final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   /// initialize native notifications for the required platforms
   Future<void> init() async {
-    // TODO 7
+    // TODO 7: check if the notifications permission is granted (permission required starting from API 33)
     if (!(await checkNotificationsPermission())) return;
-    // TODO 8
+    // TODO 8: specify both platforms notification settings
     const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     DarwinInitializationSettings iosInitializationSettings = DarwinInitializationSettings(
       onDidReceiveLocalNotification: (id, title, body, payload) {},
     );
-    // TODO 9
+    // TODO 9: add both platform specific settings as arguments for the generic notification initialization settings
     InitializationSettings initializationSettings = InitializationSettings(android: androidInitializationSettings, iOS: iosInitializationSettings);
-    // TODO 10
+    // TODO 10: initialize the notifications plugin using the generic initialization settings
     await notificationsPlugin.initialize(initializationSettings);
   }
 
   Future<void> showAndroidNotification(String title, String value) async {
-    // TODO 11
+    // TODO 11: define android channel
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
     // description: for example, this channel groups the notifications that are related to advertisements and offers
@@ -39,12 +39,12 @@ class LocalNotificationService {
     const NotificationDetails notificationDetails = NotificationDetails(android: androidNotificationChannel);
     const int notificationId = 1;
 
-    // TODO 12
+    // TODO 12: show notification
     await notificationsPlugin.show(notificationId, title, value, notificationDetails);
   }
 
   Future<void> showIOSNotification(String title, String value) async {
-    // TODO 11
+    // TODO 11: define ios channel
     // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentSound: Play a sound when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
@@ -62,7 +62,7 @@ class LocalNotificationService {
     const NotificationDetails notificationDetails = NotificationDetails(iOS: iOSNotificationChannel);
     const int notificationId = 1;
 
-    // TODO 12
+    // TODO 12: show notification
     await notificationsPlugin.show(notificationId, title, value, notificationDetails);
   }
 
