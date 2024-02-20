@@ -1,22 +1,29 @@
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationService {
+  // TODO 5
   final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   /// initialize native notifications for the required platforms
   Future<void> init() async {
+    // TODO 7
+    if (!(await checkNotificationsPermission())) return;
+    // TODO 8
     const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosInitializationSettings = DarwinInitializationSettings();
-
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iosInitializationSettings,
+    DarwinInitializationSettings iosInitializationSettings = DarwinInitializationSettings(
+      onDidReceiveLocalNotification: (id, title, body, payload) {},
     );
-
+    // TODO 9
+    InitializationSettings initializationSettings = InitializationSettings(android: androidInitializationSettings, iOS: iosInitializationSettings);
+    // TODO 10
     await notificationsPlugin.initialize(initializationSettings);
   }
 
   Future<void> showAndroidNotification(String title, String value) async {
+    // TODO 11
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
     // description: for example, this channel groups the notifications that are related to advertisements and offers
@@ -29,14 +36,15 @@ class LocalNotificationService {
       priority: Priority.high,
       ticker: 'you\'ve got a notification',
     );
-
     const NotificationDetails notificationDetails = NotificationDetails(android: androidNotificationChannel);
     const int notificationId = 1;
 
+    // TODO 12
     await notificationsPlugin.show(notificationId, title, value, notificationDetails);
   }
 
   Future<void> showIOSNotification(String title, String value) async {
+    // TODO 11
     // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentSound: Play a sound when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
@@ -51,12 +59,21 @@ class LocalNotificationService {
       presentBadge: true,
       presentSound: true,
     );
-
     const NotificationDetails notificationDetails = NotificationDetails(iOS: iOSNotificationChannel);
     const int notificationId = 1;
 
+    // TODO 12
     await notificationsPlugin.show(notificationId, title, value, notificationDetails);
   }
 
-
+  Future<bool> checkNotificationsPermission() async {
+    if (Platform.isAndroid && await Permission.notification.isDenied) {
+      PermissionStatus status = await Permission.notification.request();
+      if (status.isDenied) {
+        Fluttertoast.showToast(msg: 'You have to accept push notifications permission');
+        return false;
+      }
+    }
+    return true;
+  }
 }
