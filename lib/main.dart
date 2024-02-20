@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:push_notifications_sample/local_notification_service.dart';
@@ -28,14 +29,6 @@ class MyHomePage extends StatelessWidget {
 
   MyHomePage({super.key});
 
-  void _triggerNotification() async {
-    if(await Permission.notification.isDenied){
-      Fluttertoast.showToast(msg: 'Notifications permission is denied');
-      return;
-    }
-    _service.showAndroidNotification('hey', 'this is a notification');
-  }
-
   @override
   Widget build(BuildContext context) {
     // TODO 14: initialize notifications service
@@ -45,12 +38,27 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Push Notifications'),
       ),
-      body: const Center(child: Text('Click the button below to get a notification')),
-      floatingActionButton: FloatingActionButton(
-        // TODO 15: call the method that shows the notification
-        onPressed: _triggerNotification,
-        child: const Icon(Icons.notifications),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // TODO 15: call the notification triggering method
+            ElevatedButton(onPressed: () => _triggerNotification(), child: const Text('Instant notification')),
+            ElevatedButton(
+              onPressed: () => _triggerNotification(repeatInterval: RepeatInterval.everyMinute),
+              child: const Text('Periodic notification'),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _triggerNotification({RepeatInterval? repeatInterval}) async {
+    if (await Permission.notification.isDenied) {
+      Fluttertoast.showToast(msg: 'Notifications permission is denied');
+      return;
+    }
+    _service.showAndroidNotification('hey', 'this is a notification', repeatInterval: repeatInterval);
   }
 }

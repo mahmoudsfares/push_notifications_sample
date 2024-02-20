@@ -22,7 +22,7 @@ class LocalNotificationService {
     await notificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showAndroidNotification(String title, String value) async {
+  Future<void> showAndroidNotification(String title, String value, {RepeatInterval? repeatInterval}) async {
     // TODO 11: define android channel
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
@@ -40,7 +40,11 @@ class LocalNotificationService {
     const int notificationId = 1;
 
     // TODO 12: show notification
-    await notificationsPlugin.show(notificationId, title, value, notificationDetails);
+    if(repeatInterval != null) {
+      await notificationsPlugin.periodicallyShow(notificationId, title, value , RepeatInterval.everyMinute ,notificationDetails);
+    } else {
+      await notificationsPlugin.show(notificationId, title, value, notificationDetails);
+    }
   }
 
   Future<void> showIOSNotification(String title, String value) async {
