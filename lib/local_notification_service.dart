@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService {
   // TODO 5: instantiate FlutterLocalNotificationsPlugin
@@ -19,10 +23,14 @@ class LocalNotificationService {
     // TODO 9: add both platform specific settings as arguments for the generic notification initialization settings
     InitializationSettings initializationSettings = InitializationSettings(android: androidInitializationSettings, iOS: iosInitializationSettings);
     // TODO 10: initialize the notifications plugin using the generic initialization settings
-    await notificationsPlugin.initialize(initializationSettings);
+    await notificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: onTapNotification,
+      onDidReceiveBackgroundNotificationResponse: onTapNotification,
+    );
   }
 
-  Future<void> showAndroidNotification(String title, String value, {RepeatInterval? repeatInterval}) async {
+  Future<void> showAndroidNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define android channel
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
@@ -40,14 +48,27 @@ class LocalNotificationService {
     const int notificationId = 1;
 
     // TODO 12: show notification
-    if(repeatInterval != null) {
-      await notificationsPlugin.periodicallyShow(notificationId, title, value , RepeatInterval.everyMinute ,notificationDetails);
+    if (scheduledAfter != null) {
+      tz.initializeTimeZones();
+      tz.Location localTime = tz.local;
+      tz.TZDateTime scheduledDate = tz.TZDateTime.now(localTime).add(scheduledAfter);
+      await notificationsPlugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        scheduledDate,
+        notificationDetails,
+        payload: payload,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } else if (repeatInterval != null) {
+      await notificationsPlugin.periodicallyShow(notificationId, title, body, RepeatInterval.everyMinute, notificationDetails, payload: payload);
     } else {
-      await notificationsPlugin.show(notificationId, title, value, notificationDetails);
+      await notificationsPlugin.show(notificationId, title, body, notificationDetails, payload: payload);
     }
   }
 
-  Future<void> showIOSNotification(String title, String value) async {
+  Future<void> showIOSNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define ios channel
     // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
@@ -67,7 +88,38 @@ class LocalNotificationService {
     const int notificationId = 1;
 
     // TODO 12: show notification
-    await notificationsPlugin.show(notificationId, title, value, notificationDetails);
+    if (scheduledAfter != null) {
+      tz.initializeTimeZones();
+      tz.Location localTime = tz.local;
+      tz.TZDateTime scheduledDate = tz.TZDateTime.now(localTime).add(scheduledAfter);
+      await notificationsPlugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        scheduledDate,
+        notificationDetails,
+        payload: payload,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } else if (repeatInterval != null) {
+      await notificationsPlugin.periodicallyShow(notificationId, title, body, RepeatInterval.everyMinute, notificationDetails, payload: payload);
+    } else {
+      await notificationsPlugin.show(notificationId, title, body, notificationDetails, payload: payload);
+    }
+  }
+
+  Future<void> cancelNotificationWithId(int notificationId) async {
+    await notificationsPlugin.cancel(notificationId);
+  }
+
+  Future<void> cancelAllNotifications() async {
+    await notificationsPlugin.cancelAll();
+  }
+
+  static final StreamController<String> notificationStream = BehaviorSubject<String>();
+
+  static void onTapNotification(NotificationResponse response) {
+    notificationStream.sink.add(response.payload!);
   }
 
   Future<bool> checkNotificationsPermission() async {
