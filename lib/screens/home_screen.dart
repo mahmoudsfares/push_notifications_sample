@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final LocalNotificationService _notificationService = LocalNotificationService();
+  late final LocalNotificationService _notificationService;
 
   @override
   void initState() {
@@ -23,17 +24,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // TODO 13: initialize notification service and set the action to be made when the notification is tapped
   void _initNotifications() async {
+    _notificationService = LocalNotificationService(iOSOnReceiveLocalNotification: iOSOnReceiveLocalNotification);
     await _notificationService.init();
-    var initialNotification = await _notificationService.notificationsPlugin.getNotificationAppLaunchDetails();
+    var initialNotification = await _notificationService.notificationsPlugin
+        .getNotificationAppLaunchDetails();
     if (initialNotification?.didNotificationLaunchApp == true) {
       // avoid using context across an async gap by ensuring that the context is used after the current frame is rendered
       Future.delayed(
         Duration.zero,
-        () => Navigator.pushNamed(context, SecondScreen.routeName, arguments: initialNotification?.notificationResponse?.payload),
+        () => Navigator.pushNamed(context, SecondScreen.routeName,
+            arguments: initialNotification?.notificationResponse?.payload),
       );
     } else {
       LocalNotificationService.notificationStream.stream.listen((payload) {
-        Navigator.pushNamed(context, SecondScreen.routeName, arguments: payload);
+        Navigator.pushNamed(context, SecondScreen.routeName,
+            arguments: payload);
       });
     }
   }
@@ -50,13 +55,17 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // TODO 14: call the notification triggering method
-            ElevatedButton(onPressed: () => _triggerNotification(), child: const Text('Instant notification')),
             ElevatedButton(
-              onPressed: () => _triggerNotification(repeatInterval: RepeatInterval.everyMinute),
+                onPressed: () => _triggerNotification(),
+                child: const Text('Instant notification')),
+            ElevatedButton(
+              onPressed: () => _triggerNotification(
+                  repeatInterval: RepeatInterval.everyMinute),
               child: const Text('Periodic notification'),
             ),
             ElevatedButton(
-              onPressed: () => _triggerNotification(scheduledAfter: const Duration(seconds: 5)),
+              onPressed: () => _triggerNotification(
+                  scheduledAfter: const Duration(seconds: 5)),
               child: const Text('Scheduled notification'),
             ),
             ElevatedButton(
@@ -69,7 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _triggerNotification({Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
+  Future<void> _triggerNotification(
+      {Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     if (await Permission.notification.isDenied) {
       Fluttertoast.showToast(msg: 'Notifications permission is denied');
       return;
@@ -80,6 +90,32 @@ class _HomeScreenState extends State<HomeScreen> {
       payload: 'my payload',
       scheduledAfter: scheduledAfter,
       repeatInterval: repeatInterval,
+    );
+  }
+
+  void iOSOnReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
+    // display a dialog with the notification details, tap ok to go to another page
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: Text(title!),
+        content: Text(body!),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('DISMISS'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('GO'),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await Navigator.pushNamed(context, SecondScreen.routeName,
+                  arguments: payload);
+            },
+          ),
+        ],
+      ),
     );
   }
 
