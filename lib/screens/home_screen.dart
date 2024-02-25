@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Fluttertoast.showToast(msg: 'Notifications permission is denied');
       return;
     }
-    _notificationService.showAndroidNotification(
+    _notificationService.showIOSNotification(
       'hey',
       'this is a notification',
       payload: 'my payload',
