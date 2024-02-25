@@ -5,7 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:push_notifications_sample/local_notification_service.dart';
 import 'package:push_notifications_sample/second_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -29,10 +30,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
 
-  // TODO 13: create an instance of the notification service class
-  final LocalNotificationService _service = LocalNotificationService();
-
-  MyHomePage({super.key});
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -43,18 +41,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // TODO 14: initialize notifications service
-    widget._service.init();
-
-    LocalNotificationService.notificationStream.stream.listen((String payload) {
-      Navigator.pushNamed(context, SecondScreen.routeName, arguments: payload);
-    });
+    _initNotifications();
   }
 
-  @override
-  void dispose() {
-    // LocalNotificationService.notificationStream.close();
-    super.dispose();
+  void _initNotifications() async {
+    await LocalNotificationService.init();
+    var initialNotification = await FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails();
+    if (initialNotification?.didNotificationLaunchApp == true) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pushNamed(context, SecondScreen.routeName, arguments: initialNotification?.notificationResponse?.payload);
+      });
+    }
   }
 
   @override
@@ -79,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Text('Scheduled notification'),
             ),
             ElevatedButton(
-              onPressed: () => widget._service.cancelAllNotifications(),
+              onPressed: () => LocalNotificationService.cancelAllNotifications(),
               child: const Text('Cancel Periodic notification'),
             ),
           ],
@@ -93,6 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
       Fluttertoast.showToast(msg: 'Notifications permission is denied');
       return;
     }
-    widget._service.showAndroidNotification('hey', 'this is a notification', payload: 'my payload', scheduledAfter: scheduledAfter, repeatInterval: repeatInterval);
+    LocalNotificationService.showAndroidNotification('hey', 'this is a notification', payload: 'my payload', scheduledAfter: scheduledAfter, repeatInterval: repeatInterval);
+  }
+
+  @override
+  void dispose() {
+    LocalNotificationService.notificationStream.close();
+    super.dispose();
   }
 }

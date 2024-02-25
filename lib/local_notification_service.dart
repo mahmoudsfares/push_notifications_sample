@@ -9,10 +9,10 @@ import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService {
   // TODO 5: instantiate FlutterLocalNotificationsPlugin
-  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   /// initialize native notifications for the required platforms
-  Future<void> init() async {
+  static Future<void> init() async {
     // TODO 7: check if the notifications permission is granted (permission required starting from API 33)
     if (!(await checkNotificationsPermission())) return;
     // TODO 8: specify both platforms notification settings
@@ -30,7 +30,7 @@ class LocalNotificationService {
     );
   }
 
-  Future<void> showAndroidNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
+  static Future<void> showAndroidNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define android channel
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
@@ -68,7 +68,7 @@ class LocalNotificationService {
     }
   }
 
-  Future<void> showIOSNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
+  static Future<void> showIOSNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define ios channel
     // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
@@ -108,21 +108,21 @@ class LocalNotificationService {
     }
   }
 
-  Future<void> cancelNotificationWithId(int notificationId) async {
+  static Future<void> cancelNotificationWithId(int notificationId) async {
     await notificationsPlugin.cancel(notificationId);
   }
 
-  Future<void> cancelAllNotifications() async {
+  static Future<void> cancelAllNotifications() async {
     await notificationsPlugin.cancelAll();
   }
 
-  static final StreamController<String> notificationStream = BehaviorSubject<String>();
+  static final notificationStream = BehaviorSubject<String>();
 
   static void onTapNotification(NotificationResponse response) {
-    notificationStream.sink.add(response.payload!);
+    notificationStream.add(response.payload!);
   }
 
-  Future<bool> checkNotificationsPermission() async {
+  static Future<bool> checkNotificationsPermission() async {
     if (Platform.isAndroid && await Permission.notification.isDenied) {
       PermissionStatus status = await Permission.notification.request();
       if (status.isDenied) {
