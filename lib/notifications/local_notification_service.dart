@@ -3,16 +3,20 @@ import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService {
   // TODO 5: instantiate FlutterLocalNotificationsPlugin
-  static final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  // TODO 6: handle onTap actions by passing the payload to an observable stream
+  static final StreamController<String> notificationStream = StreamController<String>();
+
+  static void onTapNotification(NotificationResponse response) => notificationStream.add(response.payload!);
 
   /// initialize native notifications for the required platforms
-  static Future<void> init() async {
+  Future<void> init() async {
     // TODO 7: check if the notifications permission is granted (permission required starting from API 33)
     if (!(await checkNotificationsPermission())) return;
     // TODO 8: specify both platforms notification settings
@@ -30,7 +34,7 @@ class LocalNotificationService {
     );
   }
 
-  static Future<void> showAndroidNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
+  Future<void> showAndroidNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define android channel
     // id: has to be unique all over the app as it identifies the channel
     // name: channel name, for example "advertisements channel" or "payment notifications channel"
@@ -68,7 +72,7 @@ class LocalNotificationService {
     }
   }
 
-  static Future<void> showIOSNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
+  Future<void> showIOSNotification(String title, String body, {String? payload, Duration? scheduledAfter, RepeatInterval? repeatInterval}) async {
     // TODO 11: define ios channel
     // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
     // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
@@ -108,21 +112,15 @@ class LocalNotificationService {
     }
   }
 
-  static Future<void> cancelNotificationWithId(int notificationId) async {
+  Future<void> cancelNotificationWithId(int notificationId) async {
     await notificationsPlugin.cancel(notificationId);
   }
 
-  static Future<void> cancelAllNotifications() async {
+  Future<void> cancelAllNotifications() async {
     await notificationsPlugin.cancelAll();
   }
 
-  static final notificationStream = BehaviorSubject<String>();
-
-  static void onTapNotification(NotificationResponse response) {
-    notificationStream.add(response.payload!);
-  }
-
-  static Future<bool> checkNotificationsPermission() async {
+  Future<bool> checkNotificationsPermission() async {
     if (Platform.isAndroid && await Permission.notification.isDenied) {
       PermissionStatus status = await Permission.notification.request();
       if (status.isDenied) {
