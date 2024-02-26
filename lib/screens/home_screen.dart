@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final LocalNotificationService _notificationService;
+
+  final LocalNotificationService _notificationService = LocalNotificationService();
 
   @override
   void initState() {
@@ -24,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // TODO 13: initialize notification service and set the action to be made when the notification is tapped
   void _initNotifications() async {
-    _notificationService = LocalNotificationService(iOSOnReceiveLocalNotification: iOSOnReceiveLocalNotification);
     await _notificationService.init();
     var initialNotification = await _notificationService.notificationsPlugin
         .getNotificationAppLaunchDetails();
@@ -90,32 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
       payload: 'my payload',
       scheduledAfter: scheduledAfter,
       repeatInterval: repeatInterval,
-    );
-  }
-
-  void iOSOnReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
-    // display a dialog with the notification details, tap ok to go to another page
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title!),
-        content: Text(body!),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('DISMISS'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('GO'),
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await Navigator.pushNamed(context, SecondScreen.routeName,
-                  arguments: payload);
-            },
-          ),
-        ],
-      ),
     );
   }
 
