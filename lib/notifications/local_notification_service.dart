@@ -87,16 +87,17 @@ class LocalNotificationService {
     RepeatInterval? repeatInterval,
   }) async {
     // TODO 11: define ios channel.. check out the additional setup in AppDelegate.swift
-    // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
-    // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
-    // presentSound: Play a sound when the notification is displayed and the application is in the foreground (only from iOS 10 onwards)
-    // sound: Specifics the file path to play (only from iOS 10 onwards)
+    // presentAlert: Present an alert when the notification is displayed and the application is in the foreground (only from iOS 10:14)
+    // presentBadge: Present the badge number when the notification is displayed and the application is in the foreground (only from iOS 10:14)
+    // presentSound: Play a sound when the notification is displayed and the application is in the foreground (only from iOS 10:14)
+    // presentList: show the notification in the notification centre when the notification is triggered while app is in the foreground (iOS >= 14)
+    // presentBanner: Present the notification in a banner when the notification is triggered while app is in the foreground (iOS >= 14)
+    // sound: Specifies the file path to play (only from iOS 10 onwards)
     // badgeNumber: The application's icon badge number
     // attachments: List<IOSNotificationAttachment>?, (only from iOS 10 onwards)
     // subtitle: Secondary description  (only from iOS 10 onwards)
     const DarwinNotificationDetails iOSNotificationChannel = DarwinNotificationDetails(
       threadIdentifier: 'PAYMENT',
-      subtitle: 'Payment channel: this channel works as a group for payment related notifications',
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
